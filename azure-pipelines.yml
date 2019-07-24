@@ -1,0 +1,33 @@
+# Ruby
+# Package your Ruby project.
+# Add steps that install rails, analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/ruby
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - group: docker-settings
+
+steps:
+  - publish: $(System.DefaultWorkingDirectory)
+    artifact: repository
+    displayName: Publish repository as artifact
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+
+  - script: docker login -u $(dockerId) -p $pass
+    env:
+      pass: $(dockerPassword)
+    displayName: Login to DockerHub
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+
+  - script:
+      docker build --file=Dockerfile --tag=$(dockerRegistry)/$(vspDockerImageName):$(Build.BuildNumber) .
+    displayName: Build VSP Docker image
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+  - script: |
+      docker tag $(dockerRegistry)/$(vspDockerImageName):$(Build.BuildNumber) $(dockerRegistry)/$(vspDockerImageName):latest
+      docker push $(dockerRegistry)/$(vspDockerImageName):$(Build.BuildNumber)
+      docker push $(dockerRegistry)/$(vspDockerImageName):latest
+    displayName: Push VSP Docker image
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
