@@ -10,11 +10,6 @@ variables:
   - group: docker-settings
 
 steps:
-  - publish: $(System.DefaultWorkingDirectory)
-    artifact: repository
-    displayName: Publish repository as artifact
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
-
   - script: docker login -u $(dockerId) -p $pass
     env:
       pass: $(dockerPassword)
