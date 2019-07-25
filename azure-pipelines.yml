@@ -7,7 +7,7 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  - group: docker-settings
+  - group: vsp-docker-settings
 
 steps:
   - script: docker login -u $(dockerId) -p $pass
@@ -17,12 +17,12 @@ steps:
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
 
   - script:
-      docker build --file=Dockerfile --tag=$(dockerRegistry)/$(vspDockerImageName):$(Build.BuildNumber) .
+      docker build --file=Dockerfile --tag=$(dockerRegistry)/$(dockerImageName):$(Build.BuildNumber) .
     displayName: Build VSP Docker image
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
   - script: |
-      docker tag $(dockerRegistry)/$(vspDockerImageName):$(Build.BuildNumber) $(dockerRegistry)/$(vspDockerImageName):latest
-      docker push $(dockerRegistry)/$(vspDockerImageName):$(Build.BuildNumber)
-      docker push $(dockerRegistry)/$(vspDockerImageName):latest
+      docker tag $(dockerRegistry)/$(dockerImageName):$(Build.BuildNumber) $(dockerRegistry)/$(dockerImageName):latest
+      docker push $(dockerRegistry)/$(dockerImageName):$(Build.BuildNumber)
+      docker push $(dockerRegistry)/$(dockerImageName):latest
     displayName: Push VSP Docker image
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
